@@ -12,7 +12,6 @@ if (isset($_GET['bulan'])) {
 // Total es yang dikirim
 $jumlah = mysqli_query($c, "select sum(qty) as jumlah FROM detailpengiriman where idbulan='$idb'"); // Menjumlahkan qty
 $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $total
-
 ?>
 
 <!DOCTYPE html>
@@ -90,12 +89,25 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                         </li>
                     </ol>
                     <div class="row">
-                        <div class="col-xl-3 col-md-6">
-
-                            <div class="card bg-light text-black mb-3 me-5">
+                        <div>
+                            <div class="card bg-light text-black mb-3 me-5" style="width: 15rem;">
                                 <div class="card-body">Total Barang Terkirim : <?= number_format($total['jumlah']); ?> Buah</div>
                             </div>
+                            <div class="d-flex">
+                                <?php
+                                // Total pengiriman perorang
+                                $query = mysqli_query($c, "SELECT dp.idpengirim, pg.namapengirim, SUM( dp.qty * pr.harga ) AS harga_pengiriman FROM detailpengiriman dp LEFT JOIN produk pr ON dp.idbarang = pr.idbarang LEFT JOIN pengirim pg ON dp.idpengirim = pg.idpengirim WHERE idbulan = '25' GROUP BY dp.idpengirim"); // Mengambil total pengiriman perorang
 
+                                while ($data = mysqli_fetch_object($query)) {
+                                    $pengirimanIndividu[] = $data;
+                                ?>
+                                    <div class="card bg-light text-black mb-3 me-3">
+                                        <div class="card-body"><?= $data->namapengirim ?> : Rp. <?= number_format($data->harga_pengiriman); ?></div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+                            </div>
                             <button type="button" class="btn bgnav1 text-white mb-4" data-bs-toggle="modal" data-bs-target="#myModal">
                                 <i class="fas fa-shipping-fast me-1" style="font-size: 18px"></i>
                                 Tambah Pengiriman
@@ -104,9 +116,7 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                             <a href="print.php?bulan=<?= $idb ?>" class="btn bg-secondary text-white mb-4 ms-2" target="_blank">
                                 <i class="fas fa-print me-1" style="font-size: 18px"></i>
                                 Print</a>
-
                         </div>
-
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-calendar-alt me-1"></i>
