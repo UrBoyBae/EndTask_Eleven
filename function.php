@@ -102,8 +102,9 @@ if (isset($_POST['addpengiriman'])) {
     $idp = $_POST['idp'];
     $qty = $_POST['qty'];
     $idb = $_POST['idb'];
+    $idpg = $_POST['idpg'];
 
-    $insert = mysqli_query($c, "insert into detailpengiriman (idbulan,idbarang,qty) values ('$idb','$idp','$qty')");
+    $insert = mysqli_query($c, "insert into detailpengiriman (idbulan,idbarang,qty,idpengirim) values ('$idb','$idp','$qty','$idpg')");
 
     if ($insert) {
         header('location: view.php?bulan=' . $idb);
@@ -192,11 +193,12 @@ if (isset($_POST['hapusbulan'])) {
 // Edit Pengiriman harian
 if (isset($_POST['editpengiriman'])) {
 
-    $jumlah = $_POST['qty'];
+    $jumlah = $_POST['qty'] + $_POST['qty2'];
     $idh = $_POST['idh'];
     $idb = $_POST['idb'];
+    $idpg = $_POST['idpg'];
 
-    $query = mysqli_query($c, "update detailpengiriman set qty='$jumlah' where idhari='$idh' ");
+    $query = mysqli_query($c, "update detailpengiriman set qty='$jumlah', idpengirim='$idpg' where idhari='$idh' ");
 
     if ($query) {
         header('location: view.php?bulan=' . $idb);
@@ -282,6 +284,62 @@ if (isset($_POST['signup'])) {
                 alert ("Gagal Menambahkan User!")
                 window.location.href("register.php")
             </script>
+        ';
+    }
+}
+
+// Tambah Pengirim
+if (isset($_POST['tambahpengirim'])) {
+    $namapengirim = $_POST['namapengirim'];
+
+    $insert = mysqli_query($c, "insert into pengirim (namapengirim) values ('$namapengirim')");
+
+    if ($insert) {
+        header('location: sender.php');
+    } else {
+        echo '
+        <script>
+            alert("Gagal menambahkan pengirim baru");
+            window.location.href("sender.php")
+        </script>
+        ';
+    }
+}
+
+// Edit Pengirim
+if (isset($_POST['editpengirim'])) {
+    $namapengirim = $_POST['namapengirim'];
+    $idpengirim = $_POST['idpengirim'];
+
+    $query = mysqli_query($c, "update pengirim set namapengirim='$namapengirim' where idpengirim='$idpengirim' ");
+
+    if ($query) {
+        header('location: sender.php');
+    } else {
+        echo '
+        <script>
+            alert("Gagal mengedit pengirim");
+            window.location.href("sender.php")
+        </script>
+        ';
+    }
+}
+
+// Hapus Pengirim
+if (isset($_POST['hapuspengirim'])) {
+    $idpengirim = $_POST['idpengirim'];
+
+    // Hapus data tabel produk
+    $query = mysqli_query($c, "delete from pengirim where idpengirim='$idpengirim'");
+
+    if ($query) {
+        header('location: sender.php');
+    } else {
+        echo '
+        <script>
+            alert("Gagal menghapus pengirim");
+            window.location.href("sender.php")
+        </script>
         ';
     }
 }

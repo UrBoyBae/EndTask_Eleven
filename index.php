@@ -59,6 +59,11 @@ require 'ceklogin.php';
                             Barang
                         </a>
 
+                        <a class="nav-link icon1 mb-2" href="sender.php" title="pengirim">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user" style="font-size: 18px"></i></div>
+                            Nama Pengirim
+                        </a>
+
                         <a class="nav-link icon1 mt-3" href="logout.php" title="logout">
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out" style="font-size: 18px"></i></div>
                             Logout

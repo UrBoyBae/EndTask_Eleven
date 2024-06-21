@@ -13,7 +13,7 @@ require 'ceklogin.php';
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Barang-Barang</title>
+    <title>Nama Pengirim</title>
     <link href="assets/img/icon3.png" rel="shortcut icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +61,7 @@ require 'ceklogin.php';
 
                         <a class="nav-link icon1 mb-2" href="sender.php" title="pengirim">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user" style="font-size: 18px"></i></div>
-                            Nama Pengirim
+                            Pengirim
                         </a>
 
                         <a class="nav-link icon1 mt-3" href="logout.php" title="logout">
@@ -75,27 +75,26 @@ require 'ceklogin.php';
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4 mb-4">Barang-Barang</h1>
+                    <h1 class="mt-4 mb-4">Pengirim</h1>
 
                     <button type="button" class="btn bgnav1 text-white mb-3" data-bs-toggle="modal" data-bs-target="#myModal">
-                        <i class="fas fa-archive me-1" style="font-size: 18px"></i>
-                        Tambah Barang
+                        <i class="fa-solid fa-user me-1" style="font-size: 18px"></i>
+                        Tambah Pengirim
                     </button>
 
                     <div class="row">
 
                         <div class="card mb-4">
                             <div class="card-header">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                Barang-Barang
+                                <i class="fa-solid fa-user me-1"></i>
+                                Semua Pengirim
                             </div>
                             <div class="card-body">
                                 <table id="datatablesSimple">
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>Nama Barang</th>
-                                            <th>Harga</th>
+                                            <th>Nama Pengirim</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -103,39 +102,37 @@ require 'ceklogin.php';
                                     <tbody>
 
                                         <?php
-                                        $get = mysqli_query($c, "select * from produk");
+                                        $get = mysqli_query($c, "select * from pengirim");
                                         $i = 1;
 
                                         while ($b = mysqli_fetch_array($get)) {
-                                            $namabarang = $b['namabarang'];
-                                            $harga = $b['harga'];
-                                            $idbarang = $b['idbarang'];
+                                            $idpengirim = $b['idpengirim'];
+                                            $namapengirim = $b['namapengirim'];
 
                                         ?>
 
                                             <tr>
                                                 <td><?= $i++; ?></td>
-                                                <td><?= $namabarang; ?></td>
-                                                <td>Rp. <?= number_format($harga); ?></td>
+                                                <td><?= $namapengirim; ?></td>
                                                 <td>
-                                                    <button type="button" class="btn btn-warning text-white mx-2 my-2" data-bs-toggle="modal" data-bs-target="#edit<?= $idbarang; ?>"><i class="fas fa-edit me-1"></i>
+                                                    <button type="button" class="btn btn-warning text-white mx-2 my-2" data-bs-toggle="modal" data-bs-target="#edit<?= $idpengirim; ?>"><i class="fas fa-edit me-1"></i>
                                                         Edit
                                                     </button>
 
-                                                    <button type="button" class="btn btn-danger text-white" data-bs-toggle="modal" data-bs-target="#delete<?= $idbarang; ?>"><i class="fas fa-trash-alt me-1"></i>
+                                                    <button type="button" class="btn btn-danger text-white" data-bs-toggle="modal" data-bs-target="#delete<?= $idpengirim; ?>"><i class="fas fa-trash-alt me-1"></i>
                                                         Delete
                                                     </button>
                                                 </td>
                                             </tr>
 
                                             <!-- Modal Edit -->
-                                            <div class="modal fade" id="edit<?= $idbarang; ?>">
+                                            <div class="modal fade" id="edit<?= $idpengirim; ?>">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
 
                                                         <!-- Modal Header -->
                                                         <div class="modal-header">
-                                                            <h4 class="modal-title">Edit Barang</h4>
+                                                            <h4 class="modal-title">Edit Pengirim</h4>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
 
@@ -143,14 +140,13 @@ require 'ceklogin.php';
 
                                                             <!-- Modal body -->
                                                             <div class="modal-body">
-                                                                <input type="text" name="namabarang" class="form-control mb-2" placeholder="Masukkan nama barang" value="<?= $namabarang; ?>">
-                                                                <input type="number" name="harga" class="form-control" placeholder="Harga" value="<?= $harga; ?>" min="1000">
-                                                                <input type="hidden" name="idp" value="<?= $idbarang; ?>">
+                                                                <input type="text" name="namapengirim" class="form-control mb-2" placeholder="Masukkan nama pengirim" value="<?= $namapengirim; ?>">
+                                                                <input type="hidden" name="idpengirim" value="<?= $idpengirim; ?>">
                                                             </div>
 
                                                             <!-- Modal footer -->
                                                             <div class="modal-footer">
-                                                                <button type="submit" name="editbarang" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
+                                                                <button type="submit" name="editpengirim" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
                                                                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                                                             </div>
 
@@ -161,13 +157,13 @@ require 'ceklogin.php';
                                             </div>
 
                                             <!-- Modal Delete -->
-                                            <div class="modal fade" id="delete<?= $idbarang; ?>">
+                                            <div class="modal fade" id="delete<?= $idpengirim; ?>">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
 
                                                         <!-- Modal Header -->
                                                         <div class="modal-header">
-                                                            <h4 class="modal-title">Hapus <?= $namabarang; ?></h4>
+                                                            <h4 class="modal-title">Hapus <?= $namapengirim; ?></h4>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
 
@@ -175,13 +171,13 @@ require 'ceklogin.php';
 
                                                             <!-- Modal body -->
                                                             <div class="modal-body">
-                                                                Apakah Anda Yakin Ingin Menghapus Barang Ini ?
-                                                                <input type="hidden" name="idp" value="<?= $idbarang; ?>">
+                                                                Apakah Anda Yakin Ingin Menghapus Pengirim Ini ?
+                                                                <input type="hidden" name="idpengirim" value="<?= $idpengirim; ?>">
                                                             </div>
 
                                                             <!-- Modal footer -->
                                                             <div class="modal-footer">
-                                                                <button type="submit" name="hapusbarang" class="btn bgnav1 text-white" data-bs-dismiss="modal">Yakin</button>
+                                                                <button type="submit" name="hapuspengirim" class="btn bgnav1 text-white" data-bs-dismiss="modal">Yakin</button>
                                                                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                                                             </div>
 
@@ -228,7 +224,7 @@ require 'ceklogin.php';
 
             <!-- Modal Header -->
             <div class="modal-header">
-                <h4 class="modal-title">Tambah Barang Baru</h4>
+                <h4 class="modal-title">Tambah Pengirim Baru</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
@@ -236,13 +232,12 @@ require 'ceklogin.php';
 
                 <!-- Modal body -->
                 <div class="modal-body">
-                    <input type="text" name="namabarang" class="form-control mb-2" placeholder="Masukkan nama barang">
-                    <input type="number" name="harga" class="form-control" placeholder="Harga" min="1000">
+                    <input type="text" name="namapengirim" class="form-control mb-2" placeholder="Masukkan nama pengirim">
                 </div>
 
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <button type="submit" name="tambahbarang" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
+                    <button type="submit" name="tambahpengirim" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                 </div>
 
