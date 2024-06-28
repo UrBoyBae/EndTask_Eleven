@@ -100,11 +100,12 @@ if (isset($_POST['pengirimanbaru'])) {
 // Pengiriman Hari Ini
 if (isset($_POST['addpengiriman'])) {
     $idp = $_POST['idp'];
-    $qty = $_POST['qty'];
     $idb = $_POST['idb'];
+    $qty = $_POST['qty'];
     $idpg = $_POST['idpg'];
+    $flag_libur = $_POST['status-pengiriman'];
 
-    $insert = mysqli_query($c, "insert into detailpengiriman (idbulan,idbarang,qty,idpengirim) values ('$idb','$idp','$qty','$idpg')");
+    $insert = mysqli_query($c, "insert into detailpengiriman (idbulan,idbarang,qty,idpengirim,flag_libur) values ('$idb','$idp','$qty','$idpg','$flag_libur')");
 
     if ($insert) {
         header('location: view.php?bulan=' . $idb);
@@ -197,8 +198,9 @@ if (isset($_POST['editpengiriman'])) {
     $idh = $_POST['idh'];
     $idb = $_POST['idb'];
     $idpg = $_POST['idpg'];
+    $flag_libur = $_POST['status-pengiriman'];
 
-    $query = mysqli_query($c, "update detailpengiriman set qty='$jumlah', idpengirim='$idpg' where idhari='$idh' ");
+    $query = mysqli_query($c, "update detailpengiriman set qty='$jumlah', idpengirim='$idpg', flag_libur='$flag_libur' where idhari='$idh' ");
 
     if ($query) {
         header('location: view.php?bulan=' . $idb);

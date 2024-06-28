@@ -70,6 +70,11 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                             Barang
                         </a>
 
+                        <a class="nav-link icon1 mb-2" href="sender.php" title="pengirim">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user" style="font-size: 18px"></i></div>
+                            Nama Pengirim
+                        </a>
+
                         <a class="nav-link icon1 mt-3" href="logout.php" title="logout">
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out" style="font-size: 18px"></i></div>
                             Logout
@@ -95,11 +100,50 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                             </div>
                             <div class="d-flex">
                                 <?php
-                                // Total pengiriman perorang
-                                $query = mysqli_query($c, "SELECT dp.idpengirim, pg.namapengirim, SUM( dp.qty * pr.harga ) AS harga_pengiriman FROM detailpengiriman dp LEFT JOIN produk pr ON dp.idbarang = pr.idbarang LEFT JOIN pengirim pg ON dp.idpengirim = pg.idpengirim WHERE idbulan = '25' GROUP BY dp.idpengirim"); // Mengambil total pengiriman perorang
+                                // Total Banyak Hari Melakukan Pengiriman Selama Sebulan
+                                $query = mysqli_query($c, "SELECT COUNT(flag_libur) AS melakukan_pengiriman FROM detailpengiriman WHERE idbulan = '$idb' AND flag_libur = '0'");
 
                                 while ($data = mysqli_fetch_object($query)) {
-                                    $pengirimanIndividu[] = $data;
+                                ?>
+                                    <div class="card bg-light text-black mb-3 me-3">
+                                        <div class="card-body">Total Hari Pengiriman : <?= number_format($data->melakukan_pengiriman); ?> Hari</div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+
+                                <?php
+                                // Total Banyak Hari Libur Selama Sebulan
+                                $query = mysqli_query($c, "SELECT COUNT(flag_libur) AS libur FROM detailpengiriman WHERE idbulan = '$idb' AND flag_libur = '1'");
+
+                                while ($data = mysqli_fetch_object($query)) {
+                                ?>
+                                    <div class="card bg-light text-black mb-3 me-3">
+                                        <div class="card-body">Total Hari Libur : <?= number_format($data->libur); ?> Hari</div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                            <div class="d-flex">
+                                <?php
+                                // Total pengiriman sebulan
+                                $query = mysqli_query($c, "SELECT SUM( dp.qty * pr.harga ) AS total_harga_pengiriman FROM detailpengiriman dp LEFT JOIN produk pr ON dp.idbarang = pr.idbarang WHERE idbulan = '$idb'"); // Mengambil total pengiriman
+
+                                while ($data = mysqli_fetch_object($query)) {
+                                ?>
+                                    <div class="card bg-light text-black mb-3 me-3">
+                                        <div class="card-body">Total Pendapatan : Rp. <?= number_format($data->total_harga_pengiriman); ?></div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+
+                                <?php
+                                // Total pengiriman perorang
+                                $query = mysqli_query($c, "SELECT dp.idpengirim, pg.namapengirim, SUM( dp.qty * 500 ) AS harga_pengiriman FROM detailpengiriman dp LEFT JOIN produk pr ON dp.idbarang = pr.idbarang INNER JOIN pengirim pg ON dp.idpengirim = pg.idpengirim WHERE idbulan = '$idb' GROUP BY dp.idpengirim"); // Mengambil total pengiriman perorang
+
+                                while ($data = mysqli_fetch_object($query)) {
                                 ?>
                                     <div class="card bg-light text-black mb-3 me-3">
                                         <div class="card-body"><?= $data->namapengirim ?> : Rp. <?= number_format($data->harga_pengiriman); ?></div>
@@ -132,16 +176,21 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                             <th>Qty</th>
                                             <th>Sub-Total</th>
                                             <th>Pengirim</th>
+                                            <th>Status Pengiriman</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
                                         <?php
-                                        $get = mysqli_query($c, "select * from detailpengiriman dp, produk pr, pengirim pg where dp.idbarang=pr.idbarang and dp.idpengirim=pg.idpengirim and idbulan='$idb'");
+                                        $get = mysqli_query($c, "select * from detailpengiriman dp INNER JOIN produk pr ON dp.idbarang=pr.idbarang LEFT JOIN pengirim pg ON dp.idpengirim=pg.idpengirim where idbulan='$idb' ORDER BY tanggal ASC");
                                         $i = 1;
 
+
                                         while ($b = mysqli_fetch_array($get)) {
+                                            // create unique id
+                                            $idunique = uniqid('', true);
+
                                             $idh = $b['idhari'];
                                             $namabarang = $b['namabarang'];
                                             $harga = $b['harga'];
@@ -149,7 +198,19 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                             $subtotal = $qty * $harga;
                                             $tanggal = $b['tanggal'];
                                             $idpg = $b['idpengirim'];
-                                            $namapg = $b['namapengirim'];
+                                            $namapg = (isset($b['namapengirim']) ? $b['namapengirim'] : "<b>-</b>");
+                                            $flag_libur = $b['flag_libur'];
+                                            $status_pengiriman = ($b['flag_libur'] == 1 ? "<div class=\"rounded-3 bg-danger d-flex justify-content-center px-2\" style=\"width: 160px;\"><span class=\"text-white\">Libur</span></div>" : "<div class=\"rounded-3 bg-success d-flex justify-content-center px-2\" style=\"width: 160px;\"><span class=\"text-white\">Melakukan Pengiriman</span></div>");
+                                            if ($flag_libur == 1) {
+                                                $selected_0 = "";
+                                                $disabled = "disabled";
+                                                $selected_1 = "selected";
+                                            } else {
+                                                $disabled = "";
+                                                $selected_0 = "selected";
+                                                $selected_1 = "";
+                                            }
+
                                         ?>
 
                                             <tr>
@@ -160,7 +221,10 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                                 <td>Rp. <?= number_format($subtotal) ?></td>
                                                 <td><?= $namapg; ?></td>
                                                 <td>
-                                                    <button type="button" class="btn btn-warning text-white mx-2 my-2" data-bs-toggle="modal" data-bs-target="#edit<?= $idh; ?>"><i class="fas fa-edit me-1"></i>
+                                                    <?= $status_pengiriman; ?>
+                                                </td>
+                                                <td class="d-flex flex-column gap-2">
+                                                    <button type="button" class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#edit<?= $idh; ?>"><i class="fas fa-edit me-1"></i>
                                                         Edit
                                                     </button>
 
@@ -187,18 +251,22 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                                             <div class="modal-body">
                                                                 Tanggal Pengiriman
                                                                 <input type="text" name="tanggal" class="form-control  mt-2 mb-2" placeholder="Tanggal" value="<?= $tanggal; ?>" disabled>
-
-                                                                Nama Barang
+                                                                <p class="mt-2 mb-2">Status Pengiriman</p>
+                                                                <select class="form-select mt-2" aria-label="select-pengirim" name="status-pengiriman" id="status-pengiriman" data-id="<?= $idunique; ?>">
+                                                                    <option <?= $selected_0; ?> value="0">Melakukan Pengiriman</option>
+                                                                    <option <?= $selected_1; ?> value="1">Libur</option>
+                                                                </select>
+                                                                <p class="mt-2 mb-2">Nama Barang</p>
                                                                 <input type="text" name="namabarang" class="form-control mt-2 mb-2" placeholder="Nama Barang" value="<?= $namabarang; ?> - Rp. <?= number_format($harga); ?>" disabled>
 
                                                                 Jumlah Barang
-                                                                <input type="number" name="qty" class="form-control mt-2 mb-2" placeholder="Jumlah" value="<?= $qty; ?>" min="1">
+                                                                <input type="number" name="qty" id="qty<?= $idunique; ?>" class="form-control mt-2 mb-2" placeholder="Jumlah" value="<?= $qty; ?>" <?= $disabled; ?> min="0">
                                                                 Jumlah Barang Tambahan
-                                                                <input type="number" name="qty2" class="form-control mt-2 mb-2" placeholder="Jumlah" value="0" min="0">
+                                                                <input type="number" name="qty2" id="qty2<?= $idunique; ?>" class="form-control mt-2 mb-2" placeholder="Jumlah" value="0" <?= $disabled; ?> min="0">
                                                                 <input type="hidden" name="idh" value="<?= $idh; ?>">
                                                                 <input type="hidden" name="idb" value="<?= $idb ?>">
                                                                 <p class="mt-2 mb-2">Nama Pengirim</p>
-                                                                <select class="form-select mt-2" aria-label="select-pengirim" name="idpg">
+                                                                <select class="form-select mt-2" aria-label="select-pengirim" name="idpg" id="idpg<?= $idunique; ?>" <?= $disabled; ?>>
                                                                     <?php
                                                                     // Ambil data pengirim dari tabel pengirim
                                                                     $getdatapengirim = mysqli_query($c, "select * from pengirim");
@@ -211,11 +279,20 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                                                         if ($idpengirim == $idpg) {
                                                                             $selected = "selected";
                                                                         }
+
+                                                                        $opt_libur = "";
+                                                                        if ($flag_libur == 1) {
+                                                                            // $selected = "selected";
+                                                                            // $idpengirim .= "0";
+                                                                            // $namapengirim .= "Tidak Ada Pengiriman";
+                                                                            $opt_libur = "<option selected value=\"0\">Tidak Ada Pengiriman</option>";
+                                                                        }
                                                                     ?>
                                                                         <option <?= $selected ?> value="<?= $idpengirim ?>"><?= $namapengirim ?></option>
                                                                     <?php
                                                                     }
                                                                     ?>
+                                                                    <?= $opt_libur ?>
                                                                 </select>
                                                             </div>
 
@@ -290,6 +367,77 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
         </footer>
     </div>
     </div>
+
+    <!-- Modal tambah -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Pengiriman Hari Ini</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form method="post">
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <?php
+                        // create unique id
+                        $idunique = uniqid('', true);
+                        // Ambil data dari tabel pengiriman dan produk
+                        $getdata = mysqli_query($c, "select * from pengiriman p, produk pr, pengirim pg where idbulan='$idb' and p.idbarang=pr.idbarang");
+                        // Simpan data dari $getdata
+                        $dppr = mysqli_fetch_array($getdata);
+
+                        // Panggil data dan simpan dalam var
+                        $nb = $dppr['namabarang'];
+                        $h = $dppr['harga'];
+                        $idp = $dppr['idbarang'];
+                        $namapengirim = $dppr['namapengirim'];
+                        $idpengirim = $dppr['idpengirim'];
+
+                        ?>
+                        <p class="mt-2 mb-2">Status Pengiriman</p>
+                        <select class="form-select mt-2" aria-label="select-pengiriman" name="status-pengiriman" id="status-pengiriman" data-id="<?= $idunique; ?>">
+                            <option value="0">Melakukan Pengiriman</option>
+                            <option value="1">Libur</option>
+                        </select>
+                        <p class="mt-2 mb-2">Barang Yang Dikirim</p>
+                        <input type="text" name="namabarang" class="form-control mt-2 mb-2" placeholder="Nama Barang" value="<?= $nb ?> - Rp. <?= number_format($h);  ?>" disabled>
+                        <p class="mt-2 mb-2">Jumlah Barang Yang Dikirim</p>
+                        <input type="number" name="qty" id="qty<?= $idunique; ?>" class="form-control mt-2" placeholder="Masukkan Jumlah" min="0" value="60">
+                        <input type="hidden" name="idb" value="<?= $idb ?>">
+                        <input type="hidden" name="idp" value="<?= $idp ?>">
+                        <p class="mt-2 mb-2">Nama Pengirim</p>
+                        <select class="form-select mt-2" aria-label="select-pengirim" name="idpg" id="idpg<?= $idunique; ?>">
+                            <?php
+                            // Ambil data pengirim dari tabel pengirim
+                            $getdatapengirim = mysqli_query($c, "select * from pengirim");
+                            // Simpan data dari $getdata
+                            while ($data = mysqli_fetch_array($getdatapengirim)) {
+                                $idpengirim = $data['idpengirim'];
+                                $namapengirim = $data['namapengirim'];
+                            ?>
+                                <option value="<?= $idpengirim ?>"><?= $namapengirim ?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="submit" name="addpengiriman" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="js/scripts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
@@ -298,70 +446,5 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
     <script src="js/datatables-simple-demo.js"></script>
 </body>
-
-<!-- Modal tambah -->
-<div class="modal fade" id="myModal">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Pengiriman Hari Ini</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form method="post">
-
-                <!-- Modal body -->
-                <div class="modal-body">
-                    <?php
-                    // Ambil data dari tabel pengiriman dan produk
-                    $getdata = mysqli_query($c, "select * from pengiriman p, produk pr, pengirim pg where idbulan='$idb' and p.idbarang=pr.idbarang");
-                    // Simpan data dari $getdata
-                    $dppr = mysqli_fetch_array($getdata);
-
-                    // Panggil data dan simpan dalam var
-                    $nb = $dppr['namabarang'];
-                    $h = $dppr['harga'];
-                    $idp = $dppr['idbarang'];
-                    $namapengirim = $dppr['namapengirim'];
-                    $idpengirim = $dppr['idpengirim'];
-
-                    ?>
-
-                    Barang Yang Dikirim
-                    <input type="text" name="namabarang" class="form-control mt-2 mb-2" placeholder="Nama Barang" value="<?= $nb ?> - Rp. <?= number_format($h);  ?>" disabled>
-                    <input type="number" name="qty" class="form-control mt-2" placeholder="Masukkan Jumlah" min="1">
-                    <input type="hidden" name="idb" value="<?= $idb ?>">
-                    <input type="hidden" name="idp" value="<?= $idp ?>">
-                    <p class="mt-2 mb-2">Nama Pengirim</p>
-                    <select class="form-select mt-2" aria-label="select-pengirim" name="idpg">
-                        <?php
-                        // Ambil data pengirim dari tabel pengirim
-                        $getdatapengirim = mysqli_query($c, "select * from pengirim");
-                        // Simpan data dari $getdata
-                        while ($data = mysqli_fetch_array($getdatapengirim)) {
-                            $idpengirim = $data['idpengirim'];
-                            $namapengirim = $data['namapengirim'];
-                        ?>
-                            <option value="<?= $idpengirim ?>"><?= $namapengirim ?></option>
-                        <?php
-                        }
-                        ?>
-                    </select>
-                </div>
-
-                <!-- Modal footer -->
-                <div class="modal-footer">
-                    <button type="submit" name="addpengiriman" class="btn bgnav1 text-white" data-bs-dismiss="modal">Submit</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-</div>
-
 
 </html>
