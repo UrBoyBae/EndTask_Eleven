@@ -69,13 +69,14 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                             <th>Hari Ke-</th>
                             <th>Tanggal</th>
                             <th>Nama Barang</th>
+                            <th>Status Pengiriman</th>
                             <th>Qty</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <?php
-                        $get = mysqli_query($c, "select * from detailpengiriman dp, produk pr where dp.idbarang=pr.idbarang and idbulan='$idb'");
+                        $get = mysqli_query($c, "select * from detailpengiriman dp INNER JOIN produk pr ON dp.idbarang=pr.idbarang LEFT JOIN pengirim pg ON dp.idpengirim=pg.idpengirim where idbulan='$idb' ORDER BY tanggal ASC");
                         $i = 1;
 
                         while ($b = mysqli_fetch_array($get)) {
@@ -85,6 +86,7 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                             $qty = $b['qty'];
                             $subtotal = $qty * $harga;
                             $tanggal = $b['tanggal'];
+                            $status_pengiriman = ($b['flag_libur'] == 1 ? "Libur" : "Melakukan Pengiriman");
 
                             // Hitung Total Harga
                             $getqty = mysqli_query($c, "select sum(qty) as jumlahqty from detailpengiriman where idbulan='$idb' ");
@@ -96,6 +98,7 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                 <td><?= $i++; ?></td>
                                 <td><?= $tanggal; ?></td>
                                 <td><?= $namabarang; ?> - Rp. <?= number_format($harga); ?></td>
+                                <td><?= $status_pengiriman ?></td>
                                 <td><?= number_format($qty) ?> Buah</td>
                             </tr>
 
