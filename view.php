@@ -2,6 +2,17 @@
 
 require 'ceklogin.php';
 
+function convertMonthAndDay($date) {
+    $convertDayToString = array('0' => 'Minggu', '1' => 'Senin', '2' => 'Selasa', '3' => 'Rabu', '4' => 'Kamis', '5' => 'Jumat', '6' => 'Sabtu');
+    $convertMonthToString = array('01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember');
+    
+    $explode_tanggal = explode(" ", $date);
+    $arr_tanggal = explode("-", $explode_tanggal[0]);
+    $get_hari = $convertDayToString[date('w', strtotime($explode_tanggal[0]))];
+    $get_bulan = $convertMonthToString[$arr_tanggal[1]];
+
+    return $get_hari.", ".$arr_tanggal[2]." ".$get_bulan." ".$arr_tanggal[0];
+} 
 
 if (isset($_GET['bulan'])) {
     $idb = $_GET['bulan'];
@@ -196,7 +207,7 @@ $total = mysqli_fetch_array($jumlah); // Menyimpan hasil query ke variabel $tota
                                             $harga = $b['harga'];
                                             $qty = $b['qty'];
                                             $subtotal = $qty * $harga;
-                                            $tanggal = $b['tanggal'];
+                                            $tanggal = convertMonthAndDay($b['tanggal']);
                                             $idpg = $b['idpengirim'];
                                             $namapg = (isset($b['namapengirim']) ? $b['namapengirim'] : "<b>-</b>");
                                             $flag_libur = $b['flag_libur'];
